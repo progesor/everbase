@@ -2,7 +2,8 @@
 
 import { Elysia } from 'elysia';
 import { logger } from './core/logger';
-import cors from "@elysiajs/cors"; // Logger'ı import et
+import cors from "@elysiajs/cors";
+import {dockerService} from "./core/docker.service.ts"; // Logger'ı import et
 
 const app = new Elysia()
     // Hata yakalama mekanizması
@@ -27,8 +28,11 @@ const app = new Elysia()
     .get("/api/error", () => {
         throw new Error("This is a test error!");
     })
+    .get("/api/docker/containers", async () => {
+        const containers = await dockerService.listContainers();
+        return containers;
+    })
     .listen(3000);
 
 logger.info( // console.log yerine logger.info kullan
-    `🦊 Everbase API is running at ${app.server?.hostname}:${app.server?.port}`
-);
+    `🦊 Everbase API is running at ${app.server?.hostname}:${app.server?.port}`);
