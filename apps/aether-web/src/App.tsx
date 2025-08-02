@@ -1,28 +1,16 @@
-import { useEffect, useState } from 'react';
-import { getContainers } from '@/lib/api';
-import type { ContainerInfo } from '@everbase/types'; // Paylaşılan paketten import ediyoruz
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Card bileşenlerini import et
-import { Skeleton } from "@/components/ui/skeleton"; // Skeleton bileşenini import et
+import { useEffect } from 'react';
+import { useContainerStore } from '@/store/containerStore'; // Yeni store'umuzu import ediyoruz
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function App() {
-    const [containers, setContainers] = useState<ContainerInfo[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    // Veriyi ve fonksiyonları useState yerine doğrudan store'dan çekiyoruz
+    const { containers, isLoading, error, fetchContainers } = useContainerStore();
 
     useEffect(() => {
-        getContainers()
-            .then(data => {
-                setContainers(data);
-            })
-            .catch(err => {
-                console.error("Failed to fetch containers:", err);
-                setError("Konteynerler yüklenemedi.");
-            })
-            .finally(() => {
-                // Yükleme animasyonunu görebilmek için küçük bir gecikme ekleyelim
-                setTimeout(() => setIsLoading(false), 500);
-            });
-    }, []);
+        // Bileşen ilk yüklendiğinde veri çekme eylemini tetikle
+        fetchContainers();
+    }, [fetchContainers]); // fetchContainers fonksiyonu değişmeyeceği için bu da sadece bir kez çalışır
 
     return (
         <div className="p-8">
@@ -36,6 +24,7 @@ function App() {
                     {error && <p className="text-red-500">{error}</p>}
 
                     {isLoading && (
+                        // Skeleton Loader kısmı aynı kalıyor
                         <div className="space-y-3">
                             <div className="flex items-center gap-4">
                                 <Skeleton className="h-3 w-3 rounded-full" />
@@ -57,6 +46,7 @@ function App() {
                     )}
 
                     {!isLoading && !error && (
+                        // Veri listeleme kısmı aynı kalıyor
                         <div>
                             {containers.length > 0 ? (
                                 <ul className="space-y-3">
