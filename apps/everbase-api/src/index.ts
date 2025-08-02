@@ -1,10 +1,12 @@
 // src/index.ts
 
 import { Elysia } from 'elysia';
-import { logger } from './core/logger'; // Logger'ı import et
+import { logger } from './core/logger';
+import cors from "@elysiajs/cors"; // Logger'ı import et
 
 const app = new Elysia()
     // Hata yakalama mekanizması
+    .use(cors())
     .onError(({ code, error, set }) => {
         logger.error(`Request failed with code: ${code}`, error);
 
