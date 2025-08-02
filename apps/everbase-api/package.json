@@ -8,7 +8,7 @@
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/dockerode": "^3.3.42",
+    "@types/dockerode": "^3.3.42"
   },
   "peerDependencies": {
     "typescript": "^5"
