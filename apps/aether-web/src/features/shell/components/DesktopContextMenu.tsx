@@ -1,27 +1,26 @@
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from '@/components/ui/context-menu';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { useContextMenuStore } from '@/store/contextMenuStore';
 
-interface DesktopContextMenuProps {
-  children: React.ReactNode;
-}
+export function DesktopContextMenu() {
+  const { isOpen, position, closeMenu } = useContextMenuStore();
 
-export function DesktopContextMenu({ children }: DesktopContextMenuProps) {
   return (
-    <ContextMenu>
-      <ContextMenuTrigger className="flex-grow w-full h-full">
-        {children}
-      </ContextMenuTrigger>
-      <ContextMenuContent>
-        <ContextMenuItem>Görünüm Ayarları</ContextMenuItem>
-        <ContextMenuItem>Sıralama Ölçütü</ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem disabled>Yeni Klasör Oluştur</ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
+    <DropdownMenu open={isOpen} onOpenChange={closeMenu}>
+      {/* DropdownMenuTrigger'ı boş bırakıyoruz çünkü tetiklemeyi kendimiz yapacağız */}
+      <DropdownMenuContent
+        style={{ top: `${position.y}px`, left: `${position.x}px` }}
+        className="fixed" // Pozisyonu ekrana göre ayarlamak için
+      >
+        <DropdownMenuItem>Görünüm Ayarları</DropdownMenuItem>
+        <DropdownMenuItem>Sıralama Ölçütü</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem disabled>Yeni Klasör Oluştur</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

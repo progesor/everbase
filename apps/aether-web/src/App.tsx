@@ -4,6 +4,7 @@ import { Moon, Sun } from 'lucide-react';
 import { useWindowStore } from '@/features/window-manager/windowStore';
 import { Desktop } from '@/features/shell/components/Desktop';
 import { Dock } from '@/features/shell/components/Dock';
+import { DesktopContextMenu } from '@/features/shell/components/DesktopContextMenu';
 
 function App() {
   const { theme, setTheme } = useThemeStore();
@@ -42,6 +43,7 @@ function App() {
       <Desktop />
 
       <Dock />
+      <DesktopContextMenu />
     </div>
   );
 }
