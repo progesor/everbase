@@ -1,14 +1,14 @@
 import { useThemeStore } from '@/store/themeStore';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
-import { DockerDashboard } from '@/features/docker-dashboard/components/DockerDashboard';
-import { Window } from '@/features/window-manager/components/Window';
 import { useWindowStore } from '@/features/window-manager/windowStore';
+import { Desktop } from '@/features/shell/components/Desktop';
+import { Dock } from '@/features/shell/components/Dock';
 
 function App() {
   const { theme, setTheme } = useThemeStore();
 
-  const { windows, openWindow } = useWindowStore();
+  const { openWindow } = useWindowStore();
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -24,9 +24,9 @@ function App() {
   };
 
   return (
-    <main className="h-screen w-screen p-8 overflow-hidden relative">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-blue-600">Everbase</h1>
+    <div className="h-screen w-screen flex flex-col overflow-hidden">
+      <header className="flex justify-between items-center p-2 border-b">
+        <h1 className="text-xl font-bold text-blue-600 px-2">Everbase</h1>
         <div className="flex items-center gap-2">
           <Button onClick={handleOpenTestWindow} variant="outline">
             Yeni Pencere Aç
@@ -37,16 +37,12 @@ function App() {
             <span className="sr-only">Toggle theme</span>
           </Button>
         </div>
-      </div>
-      <DockerDashboard />
+      </header>
 
-      {windows.map((win) => (
-        <Window key={win.id} id={win.id} title={win.title} zIndex={win.zIndex}>
-          <p>Bu pencerenin ID'si: {win.id}</p>
-          <p>Z-Index: {win.zIndex}</p>
-        </Window>
-      ))}
-    </main>
+      <Desktop />
+
+      <Dock />
+    </div>
   );
 }
 
