@@ -8,6 +8,11 @@
     "jsx": "react-jsx",
     "allowJs": true,
 
+    "baseUrl": ".", // BU SATIRI EKLEYİN
+    "paths": { // BU BÖLÜMÜ EKLEYİN
+      "@everbase/types": ["../../packages/types"]
+    },
+
     // Bundler mode
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

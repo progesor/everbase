@@ -1,5 +1,9 @@
 {
   "name": "everbase",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "concurrently \"cd apps/everbase-api && bun run dev\" \"cd apps/aether-web && bun run dev\""
   },

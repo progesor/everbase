@@ -1,4 +1,4 @@
-// src/types/docker.ts
+// packages/types/index.ts
 export interface ContainerInfo {
     Id: string;
     Names: string[];
