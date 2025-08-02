@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@everbase/types": ["../../packages/types"]
-    }
   },
   "include": ["src"],
   "files": [],
