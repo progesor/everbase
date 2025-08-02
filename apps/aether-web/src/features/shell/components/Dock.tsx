@@ -6,7 +6,15 @@ import { Clock } from './Clock';
 import { Separator } from '@/components/ui/separator';
 
 export function Dock() {
-  const { windows, focusWindow } = useWindowStore();
+  const { windows, toggleMinimize, focusWindow } = useWindowStore();
+
+  const handleDockIconClick = (win: (typeof windows)[0]) => {
+    if (win.displayState === 'minimized') {
+      toggleMinimize(win.id);
+    } else {
+      focusWindow(win.id);
+    }
+  };
 
   return (
     <div className="w-full h-16 bg-secondary/50 backdrop-blur-sm flex items-center justify-between p-2 border-t">
@@ -23,7 +31,7 @@ export function Dock() {
             variant="ghost"
             size="icon"
             className="h-12 w-12"
-            onClick={() => focusWindow(win.id)}
+            onClick={() => handleDockIconClick(win)}
           >
             <AppWindow />
           </Button>
