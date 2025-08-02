@@ -11,6 +11,13 @@ export const apiClient = axios.create({
     },
 });
 
+import type { ContainerInfo } from '@/types/docker';
+
+export const getContainers = async (): Promise<ContainerInfo[]> => {
+    const response = await apiClient.get('/api/docker/containers');
+    return response.data;
+};
+
 // İleride buraya interceptor'lar ekleyerek
 // her isteğe otomatik olarak token ekleme veya
 // hataları merkezi olarak yönetme gibi işlemler yapabiliriz.

@@ -1,38 +1,54 @@
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { apiClient } from '@/lib/api'; // Oluşturduğumuz istemciyi import ediyoruz
-
-// Gelen verinin tipini tanımlamak iyi bir pratiktir
-interface HealthStatus {
-    status: string;
-    time: string;
-}
+import { getContainers } from '@/lib/api';
+import type { ContainerInfo } from '@/types/docker';
 
 function App() {
-    const [backendStatus, setBackendStatus] = useState<string>('Checking...');
+    const [containers, setContainers] = useState<ContainerInfo[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // Bileşen yüklendiğinde sağlık durumunu kontrol et
-        apiClient.get<HealthStatus>('/api/health')
-            .then(response => {
-                // İstek başarılı olursa durumu güncelle
-                setBackendStatus(`OK - Server time: ${response.data.time}`);
+        getContainers()
+            .then(data => {
+                setContainers(data);
             })
-            .catch(error => {
-                // Hata olursa durumu güncelle
-                console.error("Health check failed:", error);
-                setBackendStatus('Error - Could not connect to backend.');
+            .catch(err => {
+                console.error("Failed to fetch containers:", err);
+                setError("Konteynerler yüklenemedi.");
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
-    }, []); // Boş dependency array'i sayesinde bu kod sadece bir kez çalışır
+    }, []);
 
     return (
-        <div className="p-8 flex flex-col items-start gap-4">
-            <h1 className="text-3xl font-bold text-blue-600">
-                Everbase
-            </h1>
-            <Button>Shadcn Button</Button>
-            <div className="mt-4 p-4 border rounded-md">
-                <p>Backend Status: <strong>{backendStatus}</strong></p>
+        <div className="p-8">
+            <h1 className="text-3xl font-bold text-blue-600 mb-6">Everbase</h1>
+
+            <div className="w-full p-4 border rounded-md">
+                <h2 className="text-xl font-semibold mb-4">Docker Konteynerleri</h2>
+                {isLoading && <p>Yükleniyor...</p>}
+                {error && <p className="text-red-500">{error}</p>}
+                {!isLoading && !error && (
+                    <div>
+                        {containers.length > 0 ? (
+                            <ul className="space-y-3">
+                                {containers.map(container => (
+                                    <li key={container.Id} className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg border">
+                                        <div className={`w-3 h-3 rounded-full ${container.State === 'running' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                        <div className="flex-1">
+                                            <p className="font-semibold">{container.Names[0].substring(1)}</p>
+                                            <p className="text-sm text-gray-500">{container.Image}</p>
+                                        </div>
+                                        <span className="text-sm px-2 py-1 bg-slate-200 rounded-full">{container.State}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p>Hiç konteyner bulunamadı.</p>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
