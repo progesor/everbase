@@ -12,7 +12,7 @@ function App() {
   };
 
   return (
-    <main className="p-8">
+    <main className="h-screen w-screen p-8 overflow-hidden">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-blue-600">Everbase</h1>
         <Button onClick={toggleTheme} size="icon" variant="outline">
