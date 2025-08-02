@@ -2,37 +2,37 @@
 
 import { Elysia } from 'elysia';
 import { logger } from './core/logger';
-import cors from "@elysiajs/cors";
-import {dockerService} from "./core/docker.service.ts"; // Logger'ı import et
+import cors from '@elysiajs/cors';
+import { dockerService } from './core/docker.service';
 
 const app = new Elysia()
-    // Hata yakalama mekanizması
-    .use(cors())
-    .onError(({ code, error, set }) => {
-        logger.error(`Request failed with code: ${code}`, error);
-
-        // İsteğe bağlı olarak istemciye genel bir hata mesajı dönebiliriz
-        if (code === 'NOT_FOUND') {
-            set.status = 404;
-            return { message: 'Not Found' };
-        }
-
-        set.status = 500;
-        return { message: 'Internal Server Error' };
-    })
-    .get("/api/health", () => ({
-        status: "ok",
+  .use(cors())
+  .onError(({ code, error, set }) => {
+    logger.error(`Request failed with code: ${code}`, error);
+    if (code === 'NOT_FOUND') {
+      set.status = 404;
+      return { message: 'Not Found' };
+    }
+    set.status = 500;
+    return { message: 'Internal Server Error' };
+  })
+  .group('/api/v1', (app) =>
+    app
+      .get('/health', () => ({
+        status: 'ok',
         time: new Date().toISOString(),
-    }))
-    // Hata yakalayıcıyı test etmek için geçici bir endpoint
-    .get("/api/error", () => {
-        throw new Error("This is a test error!");
-    })
-    .get("/api/docker/containers", async () => {
+      }))
+      .get('/docker/containers', async () => {
         const containers = await dockerService.listContainers();
         return containers;
-    })
-    .listen(3000);
+      })
+  )
+  .get('/api/error', () => {
+    // Bu test endpoint'ini grup dışında bırakabiliriz.
+    throw new Error('This is a test error!');
+  })
+  .listen(3000);
 
-logger.info( // console.log yerine logger.info kullan
-    `🦊 Everbase API is running at ${app.server?.hostname}:${app.server?.port}`);
+logger.info(
+  `🦊 Everbase API is running at ${app.server?.hostname}:${app.server?.port}`
+);
