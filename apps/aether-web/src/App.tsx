@@ -1,7 +1,8 @@
 import { useThemeStore } from '@/store/themeStore';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
-import { DockerDashboard } from './features/docker-dashboard/components/DockerDashboard';
+import { DockerDashboard } from '@/features/docker-dashboard/components/DockerDashboard';
+import { Window } from '@/features/window-manager/components/Window';
 
 function App() {
   const { theme, setTheme } = useThemeStore();
@@ -20,7 +21,9 @@ function App() {
           <span className="sr-only">Toggle theme</span>
         </Button>
       </div>
-
+      <Window title="Test Penceresi">
+        <p>Bu pencerenin içeriğidir.</p>
+      </Window>
       <DockerDashboard />
     </main>
   );
