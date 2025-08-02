@@ -1,5 +1,6 @@
 // src/lib/api.ts
 import axios from 'axios';
+import {ContainerInfo} from "@everbase/types";
 
 // Geliştirme ortamında backend'imizin çalıştığı adresi belirtiyoruz.
 const API_BASE_URL = 'http://localhost:3000';
@@ -11,7 +12,6 @@ export const apiClient = axios.create({
     },
 });
 
-import type { ContainerInfo } from '@/types/docker';
 
 export const getContainers = async (): Promise<ContainerInfo[]> => {
     const response = await apiClient.get('/api/docker/containers');
