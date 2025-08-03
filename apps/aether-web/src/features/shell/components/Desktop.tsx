@@ -15,7 +15,8 @@ import { useThemeStore } from '@/store/themeStore';
 import { appRegistry } from '@/registry/apps';
 import { useWallpaperStore } from '@/store/wallpaperStore';
 import { AnimatePresence } from 'framer-motion';
-import { DesktopIcons } from './DesktopIcons'; // Yeni bileşen import edildi.
+import { DesktopIcons } from './DesktopIcons';
+import { useDesktopStore } from '@/store/desktopStore'; // Yeni store import edildi
 
 const appsById = new Map(appRegistry.map((app) => [app.id, app]));
 
@@ -24,6 +25,7 @@ export function Desktop() {
   const { openWindow } = useWindowStore();
   const { theme, setTheme } = useThemeStore();
   const currentWallpaper = useWallpaperStore((state) => state.currentWallpaper);
+  const { clearSelection } = useDesktopStore(); // Seçimi temizleme fonksiyonu alındı
 
   const handleToggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -44,11 +46,11 @@ export function Desktop() {
         <div
           className="h-full w-full relative bg-cover bg-center transition-all duration-500"
           style={{ backgroundImage: `url(${currentWallpaper})` }}
+          // Masaüstü arka planına tıklandığında seçili ikonları temizle.
+          onMouseDown={clearSelection}
         >
-          {/* Sorumluluk artık bu bileşene ait. */}
           <DesktopIcons />
 
-          {/* Pencereler, simgelerin üzerinde render edilir. */}
           <AnimatePresence>
             {windows.map((winInStore: WindowInStore) => {
               if (winInStore.isMinimized) return null;
