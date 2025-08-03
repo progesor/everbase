@@ -1,7 +1,19 @@
 import { useEffect } from 'react';
 import { useThemeStore } from '@/store/themeStore';
+import React from 'react';
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+// HATA DÜZELTME: Bileşenin kabul edeceği props'lar için bir tip tanımlandı.
+// Bu, App.tsx'teki hatayı giderir.
+type ThemeProviderProps = {
+  children: React.ReactNode;
+  defaultTheme?: string;
+  storageKey?: string;
+};
+
+// Bu props'lar doğrudan kullanılmasa da, bileşenin çağrıldığı yerdeki
+// yapıyla uyumlu olması için tipe eklendi. Asıl yapılandırma
+// `useThemeStore` içinde varsayılmaktadır.
+export function ThemeProvider({ children }: ThemeProviderProps) {
   const theme = useThemeStore((state) => state.theme);
 
   useEffect(() => {

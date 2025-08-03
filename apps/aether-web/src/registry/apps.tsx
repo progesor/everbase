@@ -1,29 +1,44 @@
-import React from 'react';
 import { DockerDashboard } from '@/features/docker-dashboard/components/DockerDashboard';
-import { AppWindow, Settings } from 'lucide-react'; // Ayarlar için daha uygun bir ikon import edelim
-
-type IconComponent = React.ForwardRefExoticComponent<
-  React.RefAttributes<SVGSVGElement> & { size?: number; className?: string }
->;
+import { AppLauncher } from '@/features/launcher/components/AppLauncher';
+import {
+  Terminal,
+  BotMessageSquare,
+  Settings,
+  LayoutDashboard,
+} from 'lucide-react';
+import React from 'react';
 
 export interface AppDefinition {
   id: string;
   name: string;
-  icon: IconComponent;
-  component: React.ComponentType;
+  icon: React.ElementType;
+  component: React.ElementType;
+  title?: string;
 }
 
 export const appRegistry: AppDefinition[] = [
   {
+    id: 'app-launcher',
+    name: 'App Launcher',
+    icon: BotMessageSquare,
+    component: AppLauncher,
+  },
+  {
     id: 'docker-dashboard',
-    name: 'Docker',
-    icon: AppWindow,
+    name: 'Docker Dashboard',
+    icon: LayoutDashboard,
     component: DockerDashboard,
   },
   {
+    id: 'terminal',
+    name: 'Terminal',
+    icon: Terminal,
+    component: () => <div>Terminal App</div>,
+  },
+  {
     id: 'settings',
-    name: 'Ayarlar',
+    name: 'Settings',
     icon: Settings,
-    component: () => <div>Ayarlar Uygulaması İçeriği</div>,
+    component: () => <div>Settings App</div>,
   },
 ];
