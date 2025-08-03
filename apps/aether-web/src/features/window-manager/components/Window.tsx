@@ -78,7 +78,6 @@ export function Window({ win }: WindowProps) {
     _e: MouseEvent | TouchEvent,
     _dir: ResizeDirection,
     ref: HTMLElement,
-    // HATA DÜZELTME: 'any' yerine daha spesifik bir tip kullanıldı.
     _delta: { width: number; height: number },
     position: { x: number; y: number }
   ) => {
@@ -105,8 +104,10 @@ export function Window({ win }: WindowProps) {
       onDragStart={handleDragStart}
       onDragStop={handleDragStop}
       onResizeStop={handleResizeStop}
-      minWidth={300}
-      minHeight={200}
+      // DÜZELTME: Rnd bileşeni artık uygulama tanımından gelen minimum boyutları
+      // veya varsayılan değerleri kullanıyor.
+      minWidth={win.app.minWidth || 300}
+      minHeight={win.app.minHeight || 200}
       style={{ zIndex: win.zIndex }}
       disableDragging={win.isMaximized || !!win.previousState}
       className="border border-border bg-background/80 backdrop-blur-sm rounded-lg shadow-lg flex flex-col"

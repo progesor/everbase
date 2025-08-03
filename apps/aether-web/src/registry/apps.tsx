@@ -5,8 +5,10 @@ import {
   BotMessageSquare,
   Settings,
   LayoutDashboard,
+  Image as ImageIcon,
 } from 'lucide-react';
 import React from 'react';
+import { WallpaperPicker } from '@/features/shell/components/WallpaperPicker';
 
 export interface AppDefinition {
   id: string;
@@ -14,6 +16,8 @@ export interface AppDefinition {
   icon: React.ElementType;
   component: React.ElementType;
   title?: string;
+  minWidth?: number; // Yeni özellik: Minimum genişlik
+  minHeight?: number; // Yeni özellik: Minimum yükseklik
 }
 
 export const appRegistry: AppDefinition[] = [
@@ -22,6 +26,18 @@ export const appRegistry: AppDefinition[] = [
     name: 'App Launcher',
     icon: BotMessageSquare,
     component: AppLauncher,
+    minWidth: 400,
+    minHeight: 350,
+  },
+  {
+    id: 'wallpaper-picker',
+    name: 'Change Wallpaper',
+    icon: ImageIcon,
+    component: WallpaperPicker,
+    // DÜZELTME: Bu uygulama için mantıklı bir minimum boyut belirlendi.
+    // Bu boyut, içeriğin bozulmasını engeller. (140px * 2 sütun + boşluklar)
+    minWidth: 340,
+    minHeight: 400,
   },
   {
     id: 'docker-dashboard',

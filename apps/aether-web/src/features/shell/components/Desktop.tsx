@@ -9,55 +9,59 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
+  ContextMenuSeparator,
 } from '@/components/ui/context-menu';
 import { useThemeStore } from '@/store/themeStore';
 import { appRegistry } from '@/registry/apps';
+import { useWallpaperStore } from '@/store/wallpaperStore';
 
-// Hızlı erişim için uygulama listesini bir Map'e dönüştür.
 const appsById = new Map(appRegistry.map((app) => [app.id, app]));
 
 export function Desktop() {
   const windows = useWindowStore((state) => state.windows);
-  const { theme, setTheme } = useThemeStore();
   const { openWindow } = useWindowStore();
+  const { theme, setTheme } = useThemeStore();
+  const currentWallpaper = useWallpaperStore((state) => state.currentWallpaper);
 
   const handleToggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
+  const openWallpaperPicker = () => {
+    const wallpaperApp = appRegistry.find(
+      (app) => app.id === 'wallpaper-picker'
+    );
+    if (wallpaperApp) {
+      openWindow(wallpaperApp);
+    }
+  };
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
-        {/*
-          ANA DÜZELTME: Bu div, artık masaüstünün kendisidir.
-          'h-full' ve 'w-full' özellikleri, App.tsx'teki <main> elemanının
-          tüm alanını kaplamasını sağlar. 'relative' özelliği, pencerelerin
-          bu alan içinde doğru konumlandırılması için kritiktir.
-          Bu yapı, hem pencerelerin hem de simgelerin görünür olmasını garantiler.
-        */}
-        <div className="h-full w-full relative p-4">
-          {/* 1. Masaüstü Simgeleri Alanı */}
-          <div className="absolute top-0 left-0 p-4 grid grid-cols-1 gap-4">
+        <div
+          className="h-full w-full relative bg-cover bg-center transition-all duration-500"
+          style={{ backgroundImage: `url(${currentWallpaper})` }}
+        >
+          {/* DÜZELTME: Masaüstü simgeleri için ayrı bir konteyner eklendi.
+              Bu yapı, simgelerin pencerelerin arkasında kalmasını sağlar. */}
+          <div className="absolute inset-0 p-4 grid grid-cols-1 auto-rows-max gap-4">
             {appRegistry.map((app) => (
               <button
                 key={app.id}
                 onClick={() => openWindow(app)}
-                className="flex flex-col items-center justify-center gap-2 p-2 rounded-lg hover:bg-secondary/50 transition-colors w-24 h-24"
+                className="flex flex-col items-center justify-center gap-2 p-2 rounded-lg hover:bg-black/20 text-white w-24 h-24 transition-colors"
                 title={`Launch ${app.name}`}
               >
-                <app.icon className="w-8 h-8" />
-                <span className="text-xs text-center truncate w-full">
+                <app.icon className="w-8 h-8 drop-shadow-lg" />
+                <span className="text-xs text-center truncate w-full font-semibold drop-shadow-lg">
                   {app.name}
                 </span>
               </button>
             ))}
           </div>
 
-          {/* 2. Pencerelerin Render Edildiği Alan */}
-          {/*
-            Masaüstü konteyneri artık görünür olduğu için, bu map fonksiyonu
-            pencereleri beklendiği gibi ekrana çizecektir.
-          */}
+          {/* Pencereler, simgelerden sonra render edilerek onların üzerinde görünür. */}
           {windows.map((winInStore: WindowInStore) => {
             const app = appsById.get(winInStore.appId);
             if (!app) return null;
@@ -66,11 +70,14 @@ export function Desktop() {
           })}
         </div>
       </ContextMenuTrigger>
-
       <ContextMenuContent>
         <ContextMenuItem onClick={handleToggleTheme}>
           Toggle Theme
         </ContextMenuItem>
+        <ContextMenuItem onClick={openWallpaperPicker}>
+          Change Wallpaper
+        </ContextMenuItem>
+        <ContextMenuSeparator />
         <ContextMenuItem>System Settings</ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
