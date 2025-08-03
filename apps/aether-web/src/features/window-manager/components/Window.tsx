@@ -3,7 +3,8 @@ import { ResizeDirection } from 're-resizable';
 import { HydratedWindow, useWindowStore } from '../windowStore';
 import { Button } from '@/components/ui/button';
 import { XIcon, MinusIcon, Maximize2Icon } from 'lucide-react';
-import { motion, useDragControls } from 'framer-motion';
+import { motion, useDragControls, useMotionValue } from 'framer-motion';
+import { useEffect } from 'react';
 
 interface WindowProps {
   win: HydratedWindow;
@@ -24,6 +25,18 @@ export function Window({ win }: WindowProps) {
   } = useWindowStore();
 
   const dragControls = useDragControls();
+
+  // 1. Değişiklik: Framer Motion'ın kendi pozisyon state'lerini kullan
+  // Bu, sürükleme sırasında sürekli re-render olmasını engeller ve state'i stabil tutar.
+  const x = useMotionValue(win.x);
+  const y = useMotionValue(win.y);
+
+  // 2. Değişiklik: Global store (Zustand) değiştiğinde motion state'lerini güncelle
+  // Bu, maksimize veya snap gibi dışarıdan gelen değişikliklerin pencereye yansımasını sağlar.
+  useEffect(() => {
+    x.set(win.x);
+    y.set(win.y);
+  }, [win.x, win.y, x, y]);
 
   const handleResizeStop = (
     _e: MouseEvent | TouchEvent,
@@ -52,13 +65,14 @@ export function Window({ win }: WindowProps) {
 
   return (
     <motion.div
+      // 3. Değişiklik: Style prop'una motion value'ları ata
       style={{
         position: 'absolute',
         width: win.width,
         height: win.height,
-        x: win.x,
-        y: win.y,
         zIndex: win.zIndex,
+        x, // 'win.x' yerine motion value kullan
+        y, // 'win.y' yerine motion value kullan
       }}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -81,7 +95,8 @@ export function Window({ win }: WindowProps) {
           unsnapForDrag(win.id, mouseEvent.clientX, mouseEvent.clientY);
         }
       }}
-      onDragEnd={(_event, info) => {
+      // 4. Değişiklik: onDragEnd'de snap kontrolü yap ve store'u güncelle
+      onDragEnd={(_event) => {
         const { clientX, clientY } = _event as MouseEvent;
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
@@ -116,17 +131,18 @@ export function Window({ win }: WindowProps) {
           snapped = true;
         }
 
+        // Eğer snap işlemi yapılmadıysa, son pozisyonu motion value'dan al ve store'a kaydet.
         if (!snapped) {
-          const newX = win.x + info.offset.x;
-          const newY = win.y + info.offset.y;
-          updateWindowPosition(win.id, newX, newY);
-          updateWindowLayout(win.appId, { x: newX, y: newY });
+          const finalX = x.get();
+          const finalY = y.get();
+          updateWindowPosition(win.id, finalX, finalY);
+          updateWindowLayout(win.appId, { x: finalX, y: finalY });
         }
       }}
     >
       <Rnd
         size={{ width: '100%', height: '100%' }}
-        position={{ x: 0, y: 0 }}
+        position={{ x: 0, y: 0 }} // Rnd'nin pozisyonu her zaman 0,0'da kalır çünkü motion.div onu taşıyor.
         onResizeStop={handleResizeStop}
         minWidth={win.app.minWidth || 300}
         minHeight={win.app.minHeight || 200}
