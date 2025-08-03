@@ -14,6 +14,7 @@ import {
 import { useThemeStore } from '@/store/themeStore';
 import { appRegistry } from '@/registry/apps';
 import { useWallpaperStore } from '@/store/wallpaperStore';
+import { AnimatePresence } from 'framer-motion'; // 1. Framer Motion import edildi.
 
 const appsById = new Map(appRegistry.map((app) => [app.id, app]));
 
@@ -43,8 +44,6 @@ export function Desktop() {
           className="h-full w-full relative bg-cover bg-center transition-all duration-500"
           style={{ backgroundImage: `url(${currentWallpaper})` }}
         >
-          {/* DÜZELTME: Masaüstü simgeleri için ayrı bir konteyner eklendi.
-              Bu yapı, simgelerin pencerelerin arkasında kalmasını sağlar. */}
           <div className="absolute inset-0 p-4 grid grid-cols-1 auto-rows-max gap-4">
             {appRegistry.map((app) => (
               <button
@@ -61,13 +60,20 @@ export function Desktop() {
             ))}
           </div>
 
-          {/* Pencereler, simgelerden sonra render edilerek onların üzerinde görünür. */}
-          {windows.map((winInStore: WindowInStore) => {
-            const app = appsById.get(winInStore.appId);
-            if (!app) return null;
-            const hydratedWin: HydratedWindow = { ...winInStore, app };
-            return <Window key={hydratedWin.id} win={hydratedWin} />;
-          })}
+          {/* 2. Pencereler listesi AnimatePresence ile sarmalandı. */}
+          {/* Bu, bir pencere kaldırıldığında çıkış animasyonunu tetikler. */}
+          <AnimatePresence>
+            {windows.map((winInStore: WindowInStore) => {
+              // Pencere küçültülmüşse, render edilmez ve animasyon listesinde yer almaz.
+              if (winInStore.isMinimized) return null;
+
+              const app = appsById.get(winInStore.appId);
+              if (!app) return null;
+
+              const hydratedWin: HydratedWindow = { ...winInStore, app };
+              return <Window key={hydratedWin.id} win={hydratedWin} />;
+            })}
+          </AnimatePresence>
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>

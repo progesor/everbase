@@ -18,14 +18,17 @@ export interface WindowInStore {
   previousState?: { x: number; y: number; width: number; height: number };
 }
 
-// HATA DÜZELTME: HydratedWindow artık WindowInStore'u doğru bir şekilde genişletiyor.
-// 'Omit' kaldırıldı, böylece 'appId' gibi önemli özellikler korunuyor.
 export interface HydratedWindow extends WindowInStore {
   app: AppDefinition;
 }
 
+type WindowLayouts = {
+  [appId: string]: { x: number; y: number; width: number; height: number };
+};
+
 export interface WindowState {
   windows: WindowInStore[];
+  layouts: WindowLayouts;
   openWindow: (app: AppDefinition) => void;
   closeWindow: (id: string) => void;
   toggleMinimize: (id: string) => void;
@@ -47,6 +50,10 @@ export interface WindowState {
       | 'bottomRight'
   ) => void;
   unsnapForDrag: (id: string, cursorX: number, cursorY: number) => void;
+  updateWindowLayout: (
+    appId: string,
+    layout: Partial<WindowLayouts[string]>
+  ) => void;
 }
 
 const HEADER_HEIGHT = 32;
@@ -61,6 +68,20 @@ export const useWindowStore = create<WindowState>()(
   persist(
     (set, get) => ({
       windows: [],
+      layouts: {},
+
+      updateWindowLayout: (appId, layout) => {
+        set((state) => ({
+          layouts: {
+            ...state.layouts,
+            [appId]: {
+              ...state.layouts[appId],
+              ...layout,
+            },
+          },
+        }));
+      },
+
       openWindow: (app: AppDefinition) => {
         set((state) => {
           const existingWindow = state.windows.find((w) => w.appId === app.id);
@@ -75,11 +96,12 @@ export const useWindowStore = create<WindowState>()(
             };
           }
 
+          const savedLayout = state.layouts[app.id];
           const newWindow: WindowInStore = {
             id: `window-${Date.now()}`,
             appId: app.id,
-            x: window.innerWidth / 2 - 300,
-            y: window.innerHeight / 2 - 200,
+            x: savedLayout?.x ?? window.innerWidth / 2 - 300,
+            y: savedLayout?.y ?? window.innerHeight / 2 - 200,
             width: 600,
             height: 400,
             isMinimized: false,
