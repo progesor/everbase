@@ -2,13 +2,16 @@ import { Rnd } from 'react-rnd';
 import { ResizeDirection } from 're-resizable';
 import { HydratedWindow, useWindowStore } from '../windowStore';
 import { Button } from '@/components/ui/button';
-import { XIcon, MinusIcon, Maximize2Icon } from 'lucide-react';
+import { XIcon, MinusIcon, Maximize2Icon, CornerDownLeft } from 'lucide-react';
 import { motion, useDragControls, useMotionValue } from 'framer-motion';
 import { useEffect } from 'react';
 
 interface WindowProps {
   win: HydratedWindow;
 }
+
+const HEADER_HEIGHT = 32;
+const ACCESSIBLE_MARGIN = 40;
 
 export function Window({ win }: WindowProps) {
   const {
@@ -25,14 +28,9 @@ export function Window({ win }: WindowProps) {
   } = useWindowStore();
 
   const dragControls = useDragControls();
-
-  // 1. Değişiklik: Framer Motion'ın kendi pozisyon state'lerini kullan
-  // Bu, sürükleme sırasında sürekli re-render olmasını engeller ve state'i stabil tutar.
   const x = useMotionValue(win.x);
   const y = useMotionValue(win.y);
 
-  // 2. Değişiklik: Global store (Zustand) değiştiğinde motion state'lerini güncelle
-  // Bu, maksimize veya snap gibi dışarıdan gelen değişikliklerin pencereye yansımasını sağlar.
   useEffect(() => {
     x.set(win.x);
     y.set(win.y);
@@ -46,9 +44,17 @@ export function Window({ win }: WindowProps) {
     position: { x: number; y: number }
   ) => {
     const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
+    // HESAPLAMA DÜZELTMESİ:
+    // Konumu, potansiyel olarak eski kalabilen 'win.x' prop'u yerine, her zaman güncel olan
+    // ve anlık görsel pozisyonu temsil eden 'x.get()' motion value'suna göre hesapla.
+    const newPosition = {
+      x: x.get() + position.x,
+      y: y.get() + position.y,
+    };
+
     updateWindowSize(win.id, newSize.width, newSize.height);
-    updateWindowPosition(win.id, position.x, position.y);
-    updateWindowLayout(win.appId, { ...newSize, ...position });
+    updateWindowPosition(win.id, newPosition.x, newPosition.y);
+    updateWindowLayout(win.appId, { ...newSize, ...newPosition });
   };
 
   const handleMaximizeToggle = () => {
@@ -65,14 +71,13 @@ export function Window({ win }: WindowProps) {
 
   return (
     <motion.div
-      // 3. Değişiklik: Style prop'una motion value'ları ata
       style={{
         position: 'absolute',
         width: win.width,
         height: win.height,
         zIndex: win.zIndex,
-        x, // 'win.x' yerine motion value kullan
-        y, // 'win.y' yerine motion value kullan
+        x,
+        y,
       }}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -84,9 +89,9 @@ export function Window({ win }: WindowProps) {
       dragMomentum={false}
       dragConstraints={{
         top: 0,
-        left: -(win.width - 40),
-        right: window.innerWidth - 40,
-        bottom: window.innerHeight - 40,
+        left: -(win.width - ACCESSIBLE_MARGIN),
+        right: window.innerWidth - ACCESSIBLE_MARGIN,
+        bottom: window.innerHeight - HEADER_HEIGHT,
       }}
       onDragStart={(e) => {
         bringToFront(win.id);
@@ -95,7 +100,6 @@ export function Window({ win }: WindowProps) {
           unsnapForDrag(win.id, mouseEvent.clientX, mouseEvent.clientY);
         }
       }}
-      // 4. Değişiklik: onDragEnd'de snap kontrolü yap ve store'u güncelle
       onDragEnd={(_event) => {
         const { clientX, clientY } = _event as MouseEvent;
         const screenWidth = window.innerWidth;
@@ -131,7 +135,6 @@ export function Window({ win }: WindowProps) {
           snapped = true;
         }
 
-        // Eğer snap işlemi yapılmadıysa, son pozisyonu motion value'dan al ve store'a kaydet.
         if (!snapped) {
           const finalX = x.get();
           const finalY = y.get();
@@ -142,7 +145,7 @@ export function Window({ win }: WindowProps) {
     >
       <Rnd
         size={{ width: '100%', height: '100%' }}
-        position={{ x: 0, y: 0 }} // Rnd'nin pozisyonu her zaman 0,0'da kalır çünkü motion.div onu taşıyor.
+        position={{ x: 0, y: 0 }}
         onResizeStop={handleResizeStop}
         minWidth={win.app.minWidth || 300}
         minHeight={win.app.minHeight || 200}
@@ -177,7 +180,11 @@ export function Window({ win }: WindowProps) {
               className="w-6 h-6"
               onClick={handleMaximizeToggle}
             >
-              <Maximize2Icon className="w-4 h-4" />
+              {win.isMaximized || win.previousState ? (
+                <CornerDownLeft className="w-4 h-4" />
+              ) : (
+                <Maximize2Icon className="w-4 h-4" />
+              )}
             </Button>
             <Button
               variant="ghost"
