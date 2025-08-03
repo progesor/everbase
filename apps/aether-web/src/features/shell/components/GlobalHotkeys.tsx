@@ -1,35 +1,41 @@
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useWindowStore } from '@/features/window-manager/windowStore';
+import { useCommandPaletteStore } from '@/store/commandPaletteStore';
+import { useCallback } from 'react'; // 1. useCallback import edildi.
 
 /**
- * Tüm sistem genelindeki klavye kısayollarını yöneten bileşen.
- * Bu bileşen arayüzde bir şey render etmez, sadece arka planda çalışır.
+ * Tüm sistem genelindeki klavye kısayollarını yöneten merkezi bileşen.
  */
 export function GlobalHotkeys() {
   const { windows, closeWindow } = useWindowStore();
+  const { toggle: toggleCommandPalette } = useCommandPaletteStore();
 
-  /**
-   * O an odaklanılmış (en üstteki) pencereyi kapatır.
-   */
-  const handleCloseFocusedWindow = (event: KeyboardEvent) => {
-    // Tarayıcının varsayılan davranışını engelle (bazı durumlarda gerekebilir).
-    event.preventDefault();
-
-    if (windows.length === 0) {
-      return;
-    }
-
+  // DÜZELTME: Fonksiyonlar, gereksiz yere yeniden oluşturulmalarını önlemek
+  // için useCallback ile sarmalandı. Bu, hotkey kütüphanesinin
+  // stabil bir şekilde çalışmasını sağlar.
+  const handleCloseFocusedWindow = useCallback(() => {
+    if (windows.length === 0) return;
     const focusedWindow = windows.reduce((focused, current) =>
       current.zIndex > focused.zIndex ? current : focused
     );
-
     if (focusedWindow) {
       closeWindow(focusedWindow.id);
     }
-  };
+  }, [windows, closeWindow]);
 
-  // DÜZELTME: Tarayıcı ile çakışmayacak, daha güvenli ve sezgisel kısayollar seçildi.
-  useHotkeys('alt+w, cmd+alt+w, escape', handleCloseFocusedWindow);
+  const handleToggleCommandPalette = useCallback(() => {
+    toggleCommandPalette();
+  }, [toggleCommandPalette]);
 
-  return null; // Bu bileşen görsel bir çıktı üretmez.
+  // Pencere kapatma kısayolları
+  useHotkeys('alt+w, cmd+alt+w, escape', handleCloseFocusedWindow, {
+    preventDefault: true,
+  });
+
+  // Komut Paleti kısayolu
+  useHotkeys('alt+k, cmd+k', handleToggleCommandPalette, {
+    preventDefault: true,
+  });
+
+  return null;
 }

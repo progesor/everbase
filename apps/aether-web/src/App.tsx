@@ -4,7 +4,8 @@ import { Dock } from './features/shell/components/Dock';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
 import { useThemeStore } from '@/store/themeStore';
-import { GlobalHotkeys } from './features/shell/components/GlobalHotkeys'; // Yeni bileşen import edildi.
+import { GlobalHotkeys } from './features/shell/components/GlobalHotkeys';
+import { CommandPalette } from './features/shell/components/CommandPalette'; // Yeni bileşen import edildi.
 
 function App() {
   const { theme, setTheme } = useThemeStore();
@@ -17,6 +18,7 @@ function App() {
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       {/* Kısayol yöneticisi eklendi. */}
       <GlobalHotkeys />
+      <CommandPalette />
 
       <div className="h-screen w-screen bg-background text-foreground font-sans overflow-hidden flex flex-col">
         <header className="flex justify-between items-center p-2 border-b flex-shrink-0 z-50">
