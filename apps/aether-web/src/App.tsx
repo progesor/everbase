@@ -4,6 +4,7 @@ import { Dock } from './features/shell/components/Dock';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
 import { useThemeStore } from '@/store/themeStore';
+import { GlobalHotkeys } from './features/shell/components/GlobalHotkeys'; // Yeni bileşen import edildi.
 
 function App() {
   const { theme, setTheme } = useThemeStore();
@@ -14,8 +15,10 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      {/* Kısayol yöneticisi eklendi. */}
+      <GlobalHotkeys />
+
       <div className="h-screen w-screen bg-background text-foreground font-sans overflow-hidden flex flex-col">
-        {/* Üst Bar: 'flex-shrink-0' ile küçülmesi engellenir. */}
         <header className="flex justify-between items-center p-2 border-b flex-shrink-0 z-50">
           <h1 className="text-xl font-bold text-blue-600 px-2">Everbase</h1>
           <div className="flex items-center gap-2">
@@ -27,12 +30,10 @@ function App() {
           </div>
         </header>
 
-        {/* Ana İçerik Alanı: 'flex-grow' ile kalan tüm alanı doldurur. */}
         <main className="flex-grow relative">
           <Desktop />
         </main>
 
-        {/* Alt Dock Alanı */}
         <footer className="w-full flex-shrink-0">
           <Dock />
         </footer>
