@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
 import { useThemeStore } from '@/store/themeStore';
 import { GlobalHotkeys } from './features/shell/components/GlobalHotkeys';
-import { CommandPalette } from './features/shell/components/CommandPalette'; // Yeni bileşen import edildi.
+import { CommandPalette } from './features/shell/components/CommandPalette';
+import { Toaster } from 'sonner'; // Yeni bileşen import edildi.
 
 function App() {
   const { theme, setTheme } = useThemeStore();
@@ -40,6 +41,7 @@ function App() {
           <Dock />
         </footer>
       </div>
+      <Toaster />
     </ThemeProvider>
   );
 }
